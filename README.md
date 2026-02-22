@@ -1,16 +1,17 @@
-## Hi there 👋
+## Merhaba, Ben Berkay! 👋
 
-<!--
-**berkayerdemsoy/berkayerdemsoy** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
+Özellikle **Java** ve **Spring Framework** ekosistemine odaklanan, mikroservis mimarileri tasarlamayı ve geliştirmeyi seven bir yazılım geliştiricisiyim. Bulut altyapıları, dağıtık sistemler ve modern teknolojilerle ölçeklenebilir projeler üretmekten keyif alıyorum.
 
-Here are some ideas to get you started:
+### 🚀 Neler Üzerine Çalışıyorum?
+* **Odak Noktalarım:** Backend dünyasındaki yetkinliklerimi **Angular** ile frontend tarafında destekliyor; aynı zamanda **AWS** (Ubuntu server kurulumu, EC2, S3) ile bulut altyapısı üzerinde tecrübe kazanıyorum.
 
-- 🔭 I’m currently working on ...
-- 🌱 I’m currently learning ...
-- 👯 I’m looking to collaborate on ...
-- 🤔 I’m looking for help with ...
-- 💬 Ask me about ...
-- 📫 How to reach me: ...
-- 😄 Pronouns: ...
-- ⚡ Fun fact: ...
--->
+### 🛠️ Teknoloji Yığınım
+* **Backend & Mimari:** Java, Spring Boot, Microservices (Eureka, Feign Client)
+* **Veritabanı & Önbellek:** Redis, Liquibase
+* **Mesajlaşma & Güvenlik:** Apache Kafka, Keycloak
+* **DevOps & Bulut:** Docker, AWS
+* **Frontend:** Angular
+
+### 💼 Deneyim & Öne Çıkan Çalışmalar
+* **HAVELSAN:** KOVAN projelerinde 3.5 aylık uzun dönem stajyer olarak görev aldım. 
+* **E-Ticaret Backend:** Kafka, Redis, Liquibase ve Keycloak gibi teknolojileri entegre ederek mikroservis tabanlı kapsamlı bir e-ticaret projesi geliştirdim.
