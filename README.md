@@ -1,21 +1,26 @@
-## Merhaba, Ben Berkay! 👋
+# Hi, I'm Berkay! 👋
 
-Özellikle **Java** ve **Spring Framework** ekosistemine odaklanan, mikroservis mimarileri tasarlamayı ve geliştirmeyi seven bir yazılım geliştiricisiyim. Bulut altyapıları, dağıtık sistemler ve modern teknolojilerle ölçeklenebilir projeler üretmekten keyif alıyorum.
+I am a software developer with a strong focus on the **Java** and **Spring Framework** ecosystem, passionate about designing and developing microservice architectures. I enjoy building scalable projects using cloud infrastructures, distributed systems, and modern technologies.
 
-### Neler Üzerine Çalışıyorum?
-* **Odak Noktalarım:** Backend dünyasındaki yetkinliklerimi **Angular** ile frontend tarafında destekliyor; aynı zamanda **AWS** (Ubuntu server kurulumu, EC2, S3) ile bulut altyapısı üzerinde tecrübe kazanıyorum.
+## What I'm Working On
 
-###  Teknoloji Yığınım
-* **Backend & Mimari:** Java, Spring Boot, Microservices (Eureka, Feign Client)
-* **Veritabanı & Önbellek:** Redis, Liquibase
-* **Mesajlaşma & Güvenlik:** Apache Kafka, Keycloak
-* **DevOps & Bulut:** Docker, AWS
+**My Focus:** I complement my backend expertise with **Angular** on the frontend, while simultaneously gaining hands-on experience with cloud infrastructure using **AWS** (Ubuntu server setup, EC2, S3).
+
+## Tech Stack
+
+* **Backend & Architecture:** Java, Spring Boot, Microservices (Eureka, Feign Client)
+* **Database & Caching:** Redis, Liquibase
+* **Messaging & Security:** Apache Kafka, Keycloak
+* **DevOps & Cloud:** Docker, AWS
 * **Frontend:** Angular
 
-###  Deneyim & Öne Çıkan Çalışmalar
-* **HAVELSAN:** KOVAN projelerinde 3.5 aylık uzun dönem stajyer olarak görev aldım. 
-* **E-Ticaret Backend:** Kafka, Redis, Liquibase ve Keycloak gibi teknolojileri entegre ederek mikroservis tabanlı kapsamlı bir e-ticaret projesi geliştirdim.
+##  Experience & Highlighted Projects
 
+* **HAVELSAN:** Worked as a long-term intern for 3.5 months contributing to KOVAN projects.
+* **E-Commerce Backend:** Developed a comprehensive microservices-based e-commerce project integrating technologies like Kafka, Redis, Liquibase, and Keycloak.
+
+---
+---
 <br>
 
 <p align="left"> <img src="https://komarev.com/ghpvc/?username=berkayerdemsoy&label=Profil%20Görüntülenme&color=0e75b6&style=flat" alt="berkayerdemsoy" /> </p>
