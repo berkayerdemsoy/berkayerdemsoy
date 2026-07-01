@@ -2,16 +2,18 @@
 
 I am a Computer Engineering student and Software Developer driven by a deep curiosity for **System Architectures**. In every structure I encounter, I strive to go deeper by asking the "why" and "how" behind the technology. My journey has taught me that successful engineering is more than just writing code; it's about managing real-world use cases and maintaining effective communication at the heart of every solution.
 
+🌐 **Portfolio:** [berkayerdemsoy.dev](https://berkayerdemsoy.dev)
+
 ## About Me
 
 My primary focus is the **Java** and **Spring Boot** ecosystem, where I enjoy building scalable and optimized systems. I am highly passionate about **Software Architecture** and **DevOps** principles, aiming to create sustainable value for products and teams by implementing modern best practices and robust cloud infrastructures.
 
 ## What I'm Working On
 
-**Event Management System:** I am currently developing a scalable and secure microservices-based project. 
-* **Architecture:** Utilizing **Eureka** for service discovery and **Apache Kafka** for event-driven messaging.
+**Akissy (Live Event Management System):** I am currently developing and maintaining a scalable, secure microservices-based platform, actively live at [akissy.com](https://akissy.com). 
+* **Architecture:** Utilizing **Eureka** for service discovery, **Apache Kafka** for event-driven messaging, and **Traefik** for boundary security and API gateway management.
 * **Communication:** Implementing both **synchronous and asynchronous** communication patterns between services to ensure high availability and resilience.
-* **Goal:** Building a high-performance system that can handle complex event flows while maintaining strict security standards.
+* **Goal:** Building a high-performance system that handles complex event flows while maintaining strict security standards in a production environment.
 
 ## Tech Stack
 
@@ -24,7 +26,6 @@ My primary focus is the **Java** and **Spring Boot** ecosystem, where I enjoy bu
 ## Experience & Projects
 
 * **HAVELSAN (Long-term Intern):** Worked within the KOVAN adaptation projects team, resolving issues in live production systems and managing containerization with Docker Compose.
-* **RoamStay:** A P2P accommodation and reservation platform built to practice distributed systems logic and microservices communication.
 
 > "Every moment has meaning."
 
@@ -35,6 +36,9 @@ My primary focus is the **Java** and **Spring Boot** ecosystem, where I enjoy bu
 
 <h3 align="left">Connect with me:</h3>
 <p align="left">
+  <a href="https://berkayerdemsoy.dev" target="_blank">
+    <img src="https://img.shields.io/badge/Portfolio-berkayerdemsoy.dev-0e75b6?style=for-the-badge&logo=vercel&logoColor=white" alt="Portfolio" />
+  </a>
   <a href="https://github.com/berkayerdemsoy" target="_blank">
     <img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" />
   </a>
