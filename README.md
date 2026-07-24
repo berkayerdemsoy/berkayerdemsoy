@@ -27,7 +27,7 @@ My primary focus is the **Java** and **Spring Boot** ecosystem, where I enjoy bu
 
 * **HAVELSAN (Long-term Intern):** Worked within the KOVAN adaptation projects team, resolving issues in live production systems and managing containerization with Docker Compose.
 
-> "Every moment has meaning."
+> "One is greater than zero."
 
 ---
 <br>
