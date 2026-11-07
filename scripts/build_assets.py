@@ -8,7 +8,7 @@ Writes into assets/:
     card-<section>-{dark,light}.svg  static section cards (text lives in CARDS)
     btn-<name>-{dark,light}.svg   icon link buttons
 
-Requires Pillow and fontTools. Fonts are embedded (see fonts.py). All animation is CSS/SMIL inside the SVG, so it plays in a
+Requires Pillow and fontTools. Display text is drawn as glyph outlines (see fonts.py). All animation is CSS/SMIL inside the SVG, so it plays in a
 README <img> without scripts.
 """
 import random
@@ -17,7 +17,7 @@ from xml.sax.saxutils import escape
 
 import fonts
 import hands_ascii
-from fonts import MONO, SANS, SERIF
+from fonts import MONO
 
 OUT = Path(__file__).resolve().parent.parent / "assets"
 FONT = MONO
@@ -69,12 +69,19 @@ def layer_text(rows, cls, cols):
     return "\n".join(out)
 
 
-def typed(id_, x, y, text, size, cls, t0, t1, bg, face=fonts.MONO_REG):
-    """Text revealed left to right by a background-coloured cover that slides in steps."""
+def typed(id_, x, y, text, size, cls, t0, t1, bg, face=None, ts=None):
+    """Text revealed left to right by a background-coloured cover that slides in steps.
+
+    Without `face` the text is monospace <text>; with `face` it is drawn as outlines via `ts`.
+    """
     n = len(text)
-    w = face.width(text, size)
-    svg = (f'<g class="{cls}"><text x="{x:.0f}" y="{y}" style="font-size:{size}px" textLength="{w:.0f}" '
-           f'lengthAdjust="spacing">{escape(text)}</text>'
+    if face:
+        content, w = ts.run(face, text, x, y, size)
+    else:
+        w = n * size * 0.6
+        content = (f'<text x="{x:.0f}" y="{y}" style="font-size:{size}px" textLength="{w:.0f}" '
+                   f'lengthAdjust="spacing">{escape(text)}</text>')
+    svg = (f'<g class="{cls}">{content}'
            f'<rect class="cov cov-{id_}" x="{x - 2:.0f}" y="{y - size}" width="{w + 24:.0f}" '
            f'height="{size * 1.4:.0f}" fill="{bg}"/></g>')
     css = (f'.cov-{id_}{{animation:cov-{id_} {T}s infinite}}'
@@ -139,14 +146,15 @@ def hero(th, art):
     css.append(f'.scene{{animation:scene {T}s infinite}}'
                f'@keyframes scene{{0%,{pct(t_fade0)}{{opacity:1}}{pct(t_fade1)},100%{{opacity:0}}}}')
 
+    ts = fonts.Typesetter()
     name_y = TOP + art_h + 84
     q_size = 36
     q_w = fonts.SERIF_ITALIC.width(QUOTE, q_size)
     texts = [
         typed("p", PAD_X, 52, PROMPT, 22, "prompt", 0.2, 1.4, th["bg"]),
-        typed("n", PAD_X, name_y, NAME, 80, "name", 7.0, 7.9, th["bg"], fonts.SERIF_REG),
+        typed("n", PAD_X, name_y, NAME, 80, "name", 7.0, 7.9, th["bg"], fonts.SERIF_REG, ts),
         typed("s", PAD_X, name_y + 46, SUBTITLE, 20, "sub", 8.0, 9.2, th["bg"]),
-        typed("q", W - PAD_X - q_w, name_y, QUOTE, q_size, "quote", 9.6, 10.6, th["bg"], fonts.SERIF_ITALIC),
+        typed("q", W - PAD_X - q_w, name_y, QUOTE, q_size, "quote", 9.6, 10.6, th["bg"], fonts.SERIF_ITALIC, ts),
     ]
     css += [c for _, c in texts]
 
@@ -154,19 +162,20 @@ def hero(th, art):
     hidden_still = ",".join(f".sp{i}" for i in range(1, n_frames))
     style = (f'text{{font-family:{FONT};white-space:pre;font-size:16.6px}}'
              f'.h{{fill:{th["human"]}}}.r{{fill:{th["robot"]}}}{lv_css}'
-             f'.prompt text{{fill:{th["dim"]}}}.name text{{fill:{th["text"]};font-family:{SERIF}}}'
-             f'.sub text{{fill:{th["dim"]}}}.quote text{{fill:{th["accent"]};font-family:{SERIF};font-style:italic}}'
+             f'.prompt text{{fill:{th["dim"]}}}.name{{fill:{th["text"]}}}'
+             f'.sub text{{fill:{th["dim"]}}}.quote{{fill:{th["accent"]}}}'
              f'.sp text{{fill:{th["accent"]};font-weight:600}}'
              + "".join(css) +
              f'@media (prefers-reduced-motion:reduce){{*{{animation:none!important}}.cov,.scan,{hidden_still}{{display:none}}}}')
 
-    return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" role="img" aria-labelledby="t d">
+    return f'''<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 {W} {H}" width="{W}" height="{H}" role="img" aria-labelledby="t d">
 <title id="t">Berkay Erdemsoy</title>
 <desc id="d">ASCII art of two reaching hands: a human hand made of DNA letters and a robot hand made of binary digits, with a spark between the fingertips.</desc>
 <defs>
 <radialGradient id="g"><stop offset="0" stop-color="{th["glow"]}" stop-opacity=".9"/><stop offset=".35" stop-color="{th["glow"]}" stop-opacity=".35"/><stop offset="1" stop-color="{th["glow"]}" stop-opacity="0"/></radialGradient>
 <linearGradient id="sb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="{th["robot"]}" stop-opacity="0"/><stop offset="1" stop-color="{th["robot"]}" stop-opacity=".35"/></linearGradient>
 <clipPath id="card"><rect x="1" y="1" width="{W - 2}" height="{H - 2}" rx="14"/></clipPath>
+{ts.defs()}
 </defs>
 <style>{style}</style>
 <rect x="0.5" y="0.5" width="{W - 1}" height="{H - 1}" rx="14" fill="{th["bg"]}" stroke="{th["border"]}"/>
@@ -388,17 +397,19 @@ def _tspans(line):
 def card(th, W, spec):
     pad, f = 64, 29
     lh = round(f * 1.65)
-    max_w = (W - 2 * pad) * 0.98          # small margin for kerning differences
+    max_w = W - 2 * pad
+    ts = fonts.Typesetter()
     y = 64
     body = [f'<text class="cmd" x="{pad}" y="{y}">berkay@erdemsoy:~$ {escape(spec["cmd"])}</text>']
     y += 92
-    body.append(f'<text class="title" x="{pad}" y="{y}">{escape(spec["title"])}</text>')
+    body.append(ts.run(fonts.SERIF_REG, spec["title"], pad, y, 64, "title")[0])
     y += 28
     body.append(f'<rect class="bar" x="{pad}" y="{y}" width="64" height="3" rx="1.5"/>')
     y += 24
     key_f = 24
-    key_w = max((fonts.MONO_REG.width(b[1], key_f) for b in spec["blocks"] if b[0] == "kv"), default=0) + 48
+    key_w = max((len(b[1]) * key_f * 0.6 for b in spec["blocks"] if b[0] == "kv"), default=0) + 48
     indent = 34
+    space = fonts.SANS_REG.width(" ", f)
     for b in spec["blocks"]:
         kind = b[0]
         if kind == "gap":
@@ -406,29 +417,34 @@ def card(th, W, spec):
             continue
         if kind == "kv":
             y += lh
-            body.append(f'<text class="key" x="{pad}" y="{y}">{escape(b[1])}</text>'
-                        f'<text x="{pad + key_w:.0f}" y="{y}">{escape(b[2])}</text>')
+            body.append(f'<text class="key" x="{pad}" y="{y}">{escape(b[1])}</text>')
+            body.append(ts.run(fonts.SANS_REG, b[2], pad + key_w, y, f)[0])
             continue
         dx = indent if kind == "li" else 0
         for i, line in enumerate(_wrap(_rich_words(b[1]), max_w - dx, f)):
             y += lh
             if kind == "li" and i == 0:
-                body.append(f'<text class="mark" x="{pad}" y="{y}">›</text>')
-            body.append(f'<text x="{pad + dx}" y="{y}">{_tspans(line)}</text>')
+                body.append(ts.run(fonts.SANS_BOLD, "›", pad, y, f, "mark")[0])
+            x = pad + dx
+            for j, word in enumerate(line):
+                if j:
+                    x += space
+                for t, em in word:
+                    svg, w = ts.run(fonts.SANS_BOLD if em else fonts.SANS_REG, t, x, y, f, "em" if em else None)
+                    body.append(svg)
+                    x += w
     H = y + 56
-    css = (f'text{{font-family:{SANS};white-space:pre;font-size:{f}px;fill:{th["text"]}}}'
-           f'.cmd{{font-family:{MONO};fill:{th["dim"]};font-size:22px}}'
-           f'.title{{font-family:{SERIF};font-size:64px}}'
-           f'.bar{{fill:{th["human"]}}}.em{{fill:{th["robot"]};font-weight:600}}'
-           f'.key{{font-family:{MONO};font-size:{key_f}px;fill:{th["human"]}}}'
-           f'.mark{{fill:{th["human"]};font-weight:600}}')
+    css = (f'text{{font-family:{MONO};white-space:pre}}'
+           f'.cmd{{fill:{th["dim"]};font-size:22px}}.key{{font-size:{key_f}px;fill:{th["human"]}}}'
+           f'.body{{fill:{th["text"]}}}.bar{{fill:{th["human"]}}}'
+           f'.em{{fill:{th["robot"]}}}.mark{{fill:{th["human"]}}}')
     plain = " ".join(" ".join(blk[1:]) for blk in spec["blocks"] if len(blk) > 1).replace("**", "")
-    return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" '
-            f'role="img" aria-labelledby="t d">\n'
+    return (f'<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" '
+            f'viewBox="0 0 {W} {H}" width="{W}" height="{H}" role="img" aria-labelledby="t d">\n'
             f'<title id="t">{escape(spec["title"])}</title>\n<desc id="d">{escape(plain)}</desc>\n'
-            f'<style>{css}</style>\n'
+            f'<defs>{ts.defs()}</defs>\n<style>{css}</style>\n'
             f'<rect x="0.5" y="0.5" width="{W - 1}" height="{H - 1}" rx="14" fill="{th["bg"]}" stroke="{th["border"]}"/>\n'
-            + "\n".join(body) + "\n</svg>\n")
+            f'<g class="body">\n' + "\n".join(body) + "\n</g>\n</svg>\n")
 
 
 # ---------------------------------------------------------------------------
@@ -468,12 +484,10 @@ def main():
     art = hands_ascii.build()
     for name, th in THEMES.items():
         svg, W = hero(th, art)
-        hero_faces = [fonts.MONO_REG, fonts.MONO_BOLD, fonts.SERIF_REG, fonts.SERIF_ITALIC]
-        (OUT / f"hero-{name}.svg").write_text(fonts.embed(svg, hero_faces))
-        (OUT / f"arch-{name}.svg").write_text(fonts.embed(arch(th, W), [fonts.MONO_REG]))
-        card_faces = [fonts.MONO_REG, fonts.SANS_REG, fonts.SANS_BOLD, fonts.SERIF_REG]
+        (OUT / f"hero-{name}.svg").write_text(svg)
+        (OUT / f"arch-{name}.svg").write_text(arch(th, W))
         for key, spec in CARDS.items():
-            (OUT / f"card-{key}-{name}.svg").write_text(fonts.embed(card(th, W, spec), card_faces))
+            (OUT / f"card-{key}-{name}.svg").write_text(card(th, W, spec))
         for btn in BUTTONS:
             (OUT / f"btn-{btn}-{name}.svg").write_text(button(th, btn))
     print(f"written to {OUT}")

@@ -1,74 +1,76 @@
-"""Embedded web fonts for the generated SVGs.
+"""Typeset text as SVG glyph outlines.
 
-An SVG shown through <img> cannot load external resources, so each face is
-subset to the characters the SVG uses and inlined as a base64 WOFF.
+GitHub serves README images with `Content-Security-Policy: default-src 'none'`,
+which blocks @font-face (including data: URIs). Display text is therefore drawn
+as paths: each glyph is defined once in <defs> and placed with <use>.
+Monospace text (prompts, ASCII art, diagram labels) stays as system-font <text>.
 Fonts are SIL OFL 1.1 (see the OFL-*.txt files next to them).
 """
-import base64
-import io
-import re
 from functools import lru_cache
-from html import unescape
 from pathlib import Path
 
-from fontTools import subset
+from fontTools.pens.svgPathPen import SVGPathPen
 from fontTools.ttLib import TTFont
 
 DIR = Path(__file__).resolve().parent / "fonts"
 
-MONO = '"Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace'
-SERIF = '"Instrument Serif",Georgia,"Times New Roman",serif'
-SANS = '"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif'
+MONO = 'ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono","DejaVu Sans Mono",monospace'
 
 
 class Face:
-    def __init__(self, family, file, weight=400, style="normal"):
-        self.family, self.file, self.weight, self.style = family, file, weight, style
-
-    @property
-    def key(self):
-        return f"{self.family}|{self.weight}|{self.style}"
+    def __init__(self, slug, file):
+        self.slug, self.file = slug, file
 
     @lru_cache(maxsize=None)
-    def _font(self):
+    def font(self):
         return TTFont(DIR / self.file)
+
+    def glyph(self, ch):
+        cmap = self.font().getBestCmap()
+        return cmap.get(ord(ch)) or cmap[ord("?")]
 
     def width(self, text, size):
         """Advance width of `text` at `size`, without kerning."""
-        f = self._font()
-        cmap, hmtx = f.getBestCmap(), f["hmtx"]
+        f = self.font()
+        return sum(f["hmtx"][self.glyph(c)][0] for c in text) * size / f["head"].unitsPerEm
+
+
+SANS_REG = Face("ir", "Inter-Regular.ttf")
+SANS_BOLD = Face("ib", "Inter-SemiBold.ttf")
+SERIF_REG = Face("sr", "InstrumentSerif-Regular.ttf")
+SERIF_ITALIC = Face("si", "InstrumentSerif-Italic.ttf")
+
+
+class Typesetter:
+    """Collects the glyphs one SVG uses and renders text runs as <use> references."""
+
+    def __init__(self):
+        self.paths = {}
+
+    def _ref(self, face, gname):
+        f = face.font()
+        gid = f"{face.slug}{f.getGlyphID(gname)}"
+        if gid not in self.paths:
+            pen = SVGPathPen(f.getGlyphSet())
+            f.getGlyphSet()[gname].draw(pen)
+            self.paths[gid] = pen.getCommands()
+        return gid if self.paths[gid] else None
+
+    def run(self, face, text, x, y, size, cls=None):
+        """Return (svg, width) for `text` with its baseline starting at (x, y)."""
+        f = face.font()
         upm = f["head"].unitsPerEm
-        units = sum(hmtx[cmap.get(ord(c), cmap[ord("?")])][0] for c in text)
-        return units * size / upm
+        s = size / upm
+        adv, uses = 0, []
+        for ch in text:
+            g = face.glyph(ch)
+            ref = self._ref(face, g)
+            if ref:
+                uses.append(f'<use xlink:href="#{ref}" x="{adv}"/>')
+            adv += f["hmtx"][g][0]
+        attr = f' class="{cls}"' if cls else ""
+        svg = f'<g{attr} transform="translate({x:.1f} {y:.1f}) scale({s:.5f} {-s:.5f})">' + "".join(uses) + "</g>"
+        return svg, adv * s
 
-    def css(self, chars):
-        font = TTFont(DIR / self.file)
-        opts = subset.Options()
-        opts.flavor = "woff"
-        opts.layout_features = ["kern", "liga"]
-        opts.name_IDs = []
-        sub = subset.Subsetter(opts)
-        sub.populate(text="".join(sorted(chars)) or " ")
-        sub.subset(font)
-        buf = io.BytesIO()
-        font.flavor = "woff"
-        font.save(buf)
-        data = base64.b64encode(buf.getvalue()).decode()
-        return (f'@font-face{{font-family:"{self.family}";font-weight:{self.weight};font-style:{self.style};'
-                f'src:url(data:font/woff;base64,{data}) format("woff")}}')
-
-
-MONO_REG = Face("Geist Mono", "GeistMono-Regular.ttf", 400)
-MONO_BOLD = Face("Geist Mono", "GeistMono-SemiBold.ttf", 600)
-SANS_REG = Face("Inter", "Inter-Regular.ttf", 400)
-SANS_BOLD = Face("Inter", "Inter-SemiBold.ttf", 600)
-SERIF_REG = Face("Instrument Serif", "InstrumentSerif-Regular.ttf", 400)
-SERIF_ITALIC = Face("Instrument Serif", "InstrumentSerif-Italic.ttf", 400, "italic")
-
-
-def embed(svg, faces):
-    """Prepend @font-face rules for `faces`, subset to the text the SVG contains."""
-    text = unescape("".join(re.findall(r">([^<]+)<", svg)))
-    chars = {c for c in text if not c.isspace()} | {" "}
-    rules = "".join(f.css(chars) for f in faces)
-    return svg.replace("<style>", "<style>" + rules, 1)
+    def defs(self):
+        return "".join(f'<path id="{k}" d="{d}"/>' for k, d in self.paths.items() if d)
