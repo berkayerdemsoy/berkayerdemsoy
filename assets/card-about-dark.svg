@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1780 688" width="1780" height="688" role="img" aria-labelledby="t d">
+<title id="t">About Me</title>
+<desc id="d">I am a Computer Engineering student and Software Developer driven by a deep curiosity for System Architectures. In every structure I encounter, I strive to go deeper by asking the "why" and "how" behind the technology. My journey has taught me that successful engineering is more than just writing code; it's about managing real-world use cases and maintaining effective communication at the heart of every solution. My primary focus is the Java and Spring Boot ecosystem, where I enjoy building scalable and optimized systems. I am highly passionate about Software Architecture and DevOps principles, aiming to create sustainable value for products and teams by implementing modern best practices and robust cloud infrastructures.</desc>
+<style>text{font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono","DejaVu Sans Mono",monospace;white-space:pre;font-size:30px;fill:#e6edf3}.cmd{fill:#7d8590;font-size:24px}.title{font-size:44px;font-weight:700}.bar{fill:#f2b38a}.em{fill:#5fd3ff;font-weight:700}.key{fill:#f2b38a}.mark{fill:#f2b38a;font-weight:700}</style>
+<rect x="0.5" y="0.5" width="1779" height="687" rx="14" fill="#0d1117" stroke="#30363d"/>
+<text class="cmd" x="56" y="60">berkay@erdemsoy:~$ cat about.md</text>
+<text class="title" x="56" y="134">About Me</text>
+<rect class="bar" x="56" y="160" width="64" height="4" rx="2"/>
+<text x="56" y="230">I am a Computer Engineering student and Software Developer driven by a deep curiosity for</text>
+<text x="56" y="278"><tspan class="em">System</tspan> <tspan class="em">Architectures</tspan>. In every structure I encounter, I strive to go deeper by asking the</text>
+<text x="56" y="326">"why" and "how" behind the technology. My journey has taught me that successful engineering</text>
+<text x="56" y="374">is more than just writing code; it's about managing real-world use cases and maintaining</text>
+<text x="56" y="422">effective communication at the heart of every solution.</text>
+<text x="56" y="494">My primary focus is the <tspan class="em">Java</tspan> and <tspan class="em">Spring</tspan> <tspan class="em">Boot</tspan> ecosystem, where I enjoy building scalable and</text>
+<text x="56" y="542">optimized systems. I am highly passionate about <tspan class="em">Software</tspan> <tspan class="em">Architecture</tspan> and <tspan class="em">DevOps</tspan> principles,</text>
+<text x="56" y="590">aiming to create sustainable value for products and teams by implementing modern best</text>
+<text x="56" y="638">practices and robust cloud infrastructures.</text>
+</svg>

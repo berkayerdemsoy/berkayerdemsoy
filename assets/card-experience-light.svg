@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1780 328" width="1780" height="328" role="img" aria-labelledby="t d">
+<title id="t">Experience &amp; Projects</title>
+<desc id="d">HAVELSAN (Long-term Intern): Worked within the KOVAN adaptation projects team, resolving issues in live production systems and managing containerization with Docker Compose.</desc>
+<style>text{font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono","DejaVu Sans Mono",monospace;white-space:pre;font-size:30px;fill:#1f2328}.cmd{fill:#656d76;font-size:24px}.title{font-size:44px;font-weight:700}.bar{fill:#b0542a}.em{fill:#0577a8;font-weight:700}.key{fill:#b0542a}.mark{fill:#b0542a;font-weight:700}</style>
+<rect x="0.5" y="0.5" width="1779" height="327" rx="14" fill="#ffffff" stroke="#d0d7de"/>
+<text class="cmd" x="56" y="60">berkay@erdemsoy:~$ cat experience.md</text>
+<text class="title" x="56" y="134">Experience &amp; Projects</text>
+<rect class="bar" x="56" y="160" width="64" height="4" rx="2"/>
+<text class="mark" x="56" y="230">›</text>
+<text x="110" y="230"><tspan class="em">HAVELSAN</tspan> <tspan class="em">(Long-term</tspan> <tspan class="em">Intern):</tspan> Worked within the KOVAN adaptation projects team, resolving</text>
+<text x="110" y="278">issues in live production systems and managing containerization with Docker Compose.</text>
+</svg>

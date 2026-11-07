@@ -1,6 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 126 36" width="126" height="36" role="img" aria-label="akissy">
-<style>text{font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono","DejaVu Sans Mono",monospace;font-size:15px;white-space:pre}</style>
-<rect x="0.5" y="0.5" width="125" height="35" rx="8" fill="#f6f8fa" stroke="#d0d7de"/>
-<text x="16" y="23"><tspan fill="#c26a00">~/</tspan><tspan fill="#1f2328">akissy</tspan></text>
-<text x="110" y="23" text-anchor="end" fill="#656d76">↗</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52" width="52" height="52" role="img" aria-label="akissy">
+<title>akissy</title>
+<rect x="0.5" y="0.5" width="51" height="51" rx="12" fill="#f6f8fa" stroke="#d0d7de"/>
+<g transform="translate(13 13) scale(1.083)"><g fill="none" stroke="#1f2328" stroke-width="1.8" stroke-linejoin="round"><path d="M3 7.5A1.5 1.5 0 0 1 4.5 6h15A1.5 1.5 0 0 1 21 7.5V10a2 2 0 0 0 0 4v2.5a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 16.5V14a2 2 0 0 0 0-4z"/><path d="M14.5 6.5v11" stroke-dasharray="1.6 2"/></g></g>
 </svg>

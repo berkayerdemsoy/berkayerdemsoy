@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1780 472" width="1780" height="472" role="img" aria-labelledby="t d">
+<title id="t">Tech Stack</title>
+<desc id="d">backend Java, Spring Boot, Microservices, C/C++, Python cloud &amp; devops Docker, AWS (EC2, S3), Jenkins, Linux (Ubuntu), Git messaging &amp; security Apache Kafka, Redis, Keycloak (OAuth2/OIDC) database PostgreSQL, MySQL, Liquibase, QueryDSL frontend Angular, Vue.js</desc>
+<style>text{font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono","DejaVu Sans Mono",monospace;white-space:pre;font-size:30px;fill:#e6edf3}.cmd{fill:#7d8590;font-size:24px}.title{font-size:44px;font-weight:700}.bar{fill:#f2b38a}.em{fill:#5fd3ff;font-weight:700}.key{fill:#f2b38a}.mark{fill:#f2b38a;font-weight:700}</style>
+<rect x="0.5" y="0.5" width="1779" height="471" rx="14" fill="#0d1117" stroke="#30363d"/>
+<text class="cmd" x="56" y="60">berkay@erdemsoy:~$ cat stack.md</text>
+<text class="title" x="56" y="134">Tech Stack</text>
+<rect class="bar" x="56" y="160" width="64" height="4" rx="2"/>
+<text class="key" x="56" y="230">backend</text><text x="470" y="230">Java, Spring Boot, Microservices, C/C++, Python</text>
+<text class="key" x="56" y="278">cloud &amp; devops</text><text x="470" y="278">Docker, AWS (EC2, S3), Jenkins, Linux (Ubuntu), Git</text>
+<text class="key" x="56" y="326">messaging &amp; security</text><text x="470" y="326">Apache Kafka, Redis, Keycloak (OAuth2/OIDC)</text>
+<text class="key" x="56" y="374">database</text><text x="470" y="374">PostgreSQL, MySQL, Liquibase, QueryDSL</text>
+<text class="key" x="56" y="422">frontend</text><text x="470" y="422">Angular, Vue.js</text>
+</svg>

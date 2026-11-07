@@ -5,7 +5,8 @@
 Writes into assets/:
     hero-{dark,light}.svg     ASCII hands animation with name and tagline
     arch-{dark,light}.svg     Akissy topology with animated traffic
-    btn-<name>-{dark,light}.svg  link buttons
+    card-<section>-{dark,light}.svg  static section cards (text lives in CARDS)
+    btn-<name>-{dark,light}.svg   icon link buttons
 
 Requires Pillow. All animation is CSS/SMIL inside the SVG, so it plays in a
 README <img> without scripts.
@@ -281,22 +282,173 @@ def arch(th, W):
 
 
 # ---------------------------------------------------------------------------
-# buttons
+# section cards
 # ---------------------------------------------------------------------------
-BUTTONS = ("portfolio", "akissy", "linkedin", "medium")
+# Block kinds: ("p", text) paragraph, ("li", text) bullet, ("kv", key, value) aligned row,
+# ("gap",) vertical space. **text** renders emphasised.
+CARDS = {
+    "about": dict(cmd="cat about.md", title="About Me", blocks=[
+        ("p", "I am a Computer Engineering student and Software Developer driven by a deep curiosity for "
+              "**System Architectures**. In every structure I encounter, I strive to go deeper by asking the "
+              "\"why\" and \"how\" behind the technology. My journey has taught me that successful engineering "
+              "is more than just writing code; it's about managing real-world use cases and maintaining "
+              "effective communication at the heart of every solution."),
+        ("gap",),
+        ("p", "My primary focus is the **Java** and **Spring Boot** ecosystem, where I enjoy building scalable "
+              "and optimized systems. I am highly passionate about **Software Architecture** and **DevOps** "
+              "principles, aiming to create sustainable value for products and teams by implementing modern "
+              "best practices and robust cloud infrastructures."),
+    ]),
+    "now": dict(cmd="cat now.md", title="What I'm Working On", blocks=[
+        ("p", "**Akissy (Live Event Management System):** I am currently developing and maintaining a scalable, "
+              "secure microservices-based platform, actively live at **akissy.com**."),
+        ("gap",),
+        ("li", "**Architecture:** Utilizing **Eureka** for service discovery, **Apache Kafka** for event-driven "
+               "messaging, and **Traefik** for boundary security and API gateway management."),
+        ("li", "**Communication:** Implementing both **synchronous and asynchronous** communication patterns "
+               "between services to ensure high availability and resilience."),
+        ("li", "**Goal:** Building a high-performance system that handles complex event flows while maintaining "
+               "strict security standards in a production environment."),
+    ]),
+    "stack": dict(cmd="cat stack.md", title="Tech Stack", blocks=[
+        ("kv", "backend", "Java, Spring Boot, Microservices, C/C++, Python"),
+        ("kv", "cloud & devops", "Docker, AWS (EC2, S3), Jenkins, Linux (Ubuntu), Git"),
+        ("kv", "messaging & security", "Apache Kafka, Redis, Keycloak (OAuth2/OIDC)"),
+        ("kv", "database", "PostgreSQL, MySQL, Liquibase, QueryDSL"),
+        ("kv", "frontend", "Angular, Vue.js"),
+    ]),
+    "experience": dict(cmd="cat experience.md", title="Experience & Projects", blocks=[
+        ("li", "**HAVELSAN (Long-term Intern):** Worked within the KOVAN adaptation projects team, resolving "
+               "issues in live production systems and managing containerization with Docker Compose."),
+    ]),
+}
 
 
-def button(th, label):
-    f, h = 15, 36
-    text = f"~/{label}"
-    w = int(len(text) * f * 0.6 + 2 * 16 + 22)
-    return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w} {h}" width="{w}" height="{h}" role="img" aria-label="{escape(label)}">
-<style>text{{font-family:{FONT};font-size:{f}px;white-space:pre}}</style>
-<rect x="0.5" y="0.5" width="{w - 1}" height="{h - 1}" rx="8" fill="{th["panel"]}" stroke="{th["border"]}"/>
-<text x="16" y="{h / 2 + 5:.0f}"><tspan fill="{th["accent"]}">~/</tspan><tspan fill="{th["text"]}">{escape(label)}</tspan></text>
-<text x="{w - 16}" y="{h / 2 + 5:.0f}" text-anchor="end" fill="{th["dim"]}">↗</text>
-</svg>
-'''
+def _rich_words(text):
+    """Split **marked** text into words; each word is a list of (text, emphasised) segments.
+
+    A segment that follows a marker without whitespace (e.g. punctuation after an
+    emphasised phrase) is glued to the previous word.
+    """
+    words, prev_open = [], False   # prev_open: previous part ended without whitespace
+    for i, part in enumerate(text.split("**")):
+        if not part:
+            continue
+        b = i % 2 == 1
+        toks = part.split()
+        if words and prev_open and not part[0].isspace() and toks:
+            words[-1].append((toks.pop(0), b))
+        words += [[(t, b)] for t in toks]
+        prev_open = not part[-1].isspace()
+    return words
+
+
+def _wrap(words, width):
+    lines, cur, n = [], [], 0
+    for w in words:
+        size = sum(len(t) for t, _ in w)
+        add = size + (1 if cur else 0)
+        if cur and n + add > width:
+            lines.append(cur)
+            cur, n, add = [], 0, size
+        cur.append(w)
+        n += add
+    if cur:
+        lines.append(cur)
+    return lines
+
+
+def _tspans(line):
+    """Render a wrapped line; adjacent segments with equal emphasis share a tspan."""
+    segs = []
+
+    def put(t, b):
+        if segs and segs[-1][1] == b:
+            segs[-1][0] += t
+        else:
+            segs.append([t, b])
+
+    for i, w in enumerate(line):
+        if i:
+            put(" ", False)
+        for t, b in w:
+            put(t, b)
+    return "".join(f'<tspan class="em">{escape(t)}</tspan>' if b else escape(t) for t, b in segs)
+
+
+def card(th, W, spec):
+    pad, f = 56, 30
+    lh = round(f * 1.6)
+    char_w = f * 0.6
+    width_chars = int((W - 2 * pad) / char_w)
+    y = 60
+    body = [f'<text class="cmd" x="{pad}" y="{y}">berkay@erdemsoy:~$ {escape(spec["cmd"])}</text>']
+    y += 74
+    body.append(f'<text class="title" x="{pad}" y="{y}">{escape(spec["title"])}</text>')
+    y += 26
+    body.append(f'<rect class="bar" x="{pad}" y="{y}" width="64" height="4" rx="2"/>')
+    y += 22
+    key_w = max((len(b[1]) for b in spec["blocks"] if b[0] == "kv"), default=0) + 3
+    for b in spec["blocks"]:
+        kind = b[0]
+        if kind == "gap":
+            y += lh // 2
+            continue
+        if kind == "kv":
+            y += lh
+            body.append(f'<text class="key" x="{pad}" y="{y}">{escape(b[1])}</text>'
+                        f'<text x="{pad + key_w * char_w:.0f}" y="{y}">{escape(b[2])}</text>')
+            continue
+        indent = 3 if kind == "li" else 0
+        for i, line in enumerate(_wrap(_rich_words(b[1]), width_chars - indent)):
+            y += lh
+            if kind == "li" and i == 0:
+                body.append(f'<text class="mark" x="{pad}" y="{y}">›</text>')
+            body.append(f'<text x="{pad + indent * char_w:.0f}" y="{y}">{_tspans(line)}</text>')
+    H = y + 50
+    css = (f'text{{font-family:{FONT};white-space:pre;font-size:{f}px;fill:{th["text"]}}}'
+           f'.cmd{{fill:{th["dim"]};font-size:24px}}.title{{font-size:44px;font-weight:700}}'
+           f'.bar{{fill:{th["human"]}}}.em{{fill:{th["robot"]};font-weight:700}}'
+           f'.key{{fill:{th["human"]}}}.mark{{fill:{th["human"]};font-weight:700}}')
+    plain = " ".join(" ".join(blk[1:]) for blk in spec["blocks"] if len(blk) > 1).replace("**", "")
+    return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" '
+            f'role="img" aria-labelledby="t d">\n'
+            f'<title id="t">{escape(spec["title"])}</title>\n<desc id="d">{escape(plain)}</desc>\n'
+            f'<style>{css}</style>\n'
+            f'<rect x="0.5" y="0.5" width="{W - 1}" height="{H - 1}" rx="14" fill="{th["bg"]}" stroke="{th["border"]}"/>\n'
+            + "\n".join(body) + "\n</svg>\n")
+
+
+# ---------------------------------------------------------------------------
+# icon buttons
+# ---------------------------------------------------------------------------
+# 24x24 icons; brand marks are simplified shapes
+ICONS = {
+    # globe
+    "portfolio": '<g fill="none" stroke="{fg}" stroke-width="1.8" stroke-linecap="round">'
+                 '<circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/>'
+                 '<path d="M3.6 9h16.8M3.6 15h16.8"/></g>',
+    # event ticket
+    "akissy": '<g fill="none" stroke="{fg}" stroke-width="1.8" stroke-linejoin="round">'
+              '<path d="M3 7.5A1.5 1.5 0 0 1 4.5 6h15A1.5 1.5 0 0 1 21 7.5V10a2 2 0 0 0 0 4v2.5a1.5 1.5 0 0 1-1.5 1.5h-15'
+              'A1.5 1.5 0 0 1 3 16.5V14a2 2 0 0 0 0-4z"/><path d="M14.5 6.5v11" stroke-dasharray="1.6 2"/></g>',
+    "linkedin": '<rect x="2.5" y="2.5" width="19" height="19" rx="3" fill="{fg}"/>'
+                '<g fill="{bg}"><circle cx="7.6" cy="7.4" r="1.55"/><rect x="6.3" y="9.8" width="2.6" height="8" rx=".3"/>'
+                '<path d="M11 9.8h2.45V11c.5-.85 1.45-1.4 2.7-1.4 2 0 3.05 1.25 3.05 3.55v4.65h-2.6v-4.2c0-1.1-.45-1.7-1.35-1.7'
+                '-.95 0-1.65.65-1.65 1.85v4.05H11z"/></g>',
+    "medium": '<g fill="{fg}"><ellipse cx="7.2" cy="12" rx="5.6" ry="5.6"/><ellipse cx="16.2" cy="12" rx="2.8" ry="5.3"/>'
+              '<ellipse cx="20.7" cy="12" rx="1.05" ry="4.8"/></g>',
+}
+BUTTONS = tuple(ICONS)
+
+
+def button(th, name):
+    s = 52
+    icon = ICONS[name].replace("{fg}", th["text"]).replace("{bg}", th["panel"])
+    return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {s} {s}" width="{s}" height="{s}" '
+            f'role="img" aria-label="{escape(name)}">\n<title>{escape(name)}</title>\n'
+            f'<rect x="0.5" y="0.5" width="{s - 1}" height="{s - 1}" rx="12" fill="{th["panel"]}" stroke="{th["border"]}"/>\n'
+            f'<g transform="translate(13 13) scale(1.083)">{icon}</g>\n</svg>\n')
 
 
 def main():
@@ -306,8 +458,10 @@ def main():
         svg, W = hero(th, art)
         (OUT / f"hero-{name}.svg").write_text(svg)
         (OUT / f"arch-{name}.svg").write_text(arch(th, W))
-        for label in BUTTONS:
-            (OUT / f"btn-{label}-{name}.svg").write_text(button(th, label))
+        for key, spec in CARDS.items():
+            (OUT / f"card-{key}-{name}.svg").write_text(card(th, W, spec))
+        for btn in BUTTONS:
+            (OUT / f"btn-{btn}-{name}.svg").write_text(button(th, btn))
     print(f"written to {OUT}")
 
 

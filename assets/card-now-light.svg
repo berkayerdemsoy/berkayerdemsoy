@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1780 640" width="1780" height="640" role="img" aria-labelledby="t d">
+<title id="t">What I'm Working On</title>
+<desc id="d">Akissy (Live Event Management System): I am currently developing and maintaining a scalable, secure microservices-based platform, actively live at akissy.com. Architecture: Utilizing Eureka for service discovery, Apache Kafka for event-driven messaging, and Traefik for boundary security and API gateway management. Communication: Implementing both synchronous and asynchronous communication patterns between services to ensure high availability and resilience. Goal: Building a high-performance system that handles complex event flows while maintaining strict security standards in a production environment.</desc>
+<style>text{font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono","DejaVu Sans Mono",monospace;white-space:pre;font-size:30px;fill:#1f2328}.cmd{fill:#656d76;font-size:24px}.title{font-size:44px;font-weight:700}.bar{fill:#b0542a}.em{fill:#0577a8;font-weight:700}.key{fill:#b0542a}.mark{fill:#b0542a;font-weight:700}</style>
+<rect x="0.5" y="0.5" width="1779" height="639" rx="14" fill="#ffffff" stroke="#d0d7de"/>
+<text class="cmd" x="56" y="60">berkay@erdemsoy:~$ cat now.md</text>
+<text class="title" x="56" y="134">What I'm Working On</text>
+<rect class="bar" x="56" y="160" width="64" height="4" rx="2"/>
+<text x="56" y="230"><tspan class="em">Akissy</tspan> <tspan class="em">(Live</tspan> <tspan class="em">Event</tspan> <tspan class="em">Management</tspan> <tspan class="em">System):</tspan> I am currently developing and maintaining a scalable,</text>
+<text x="56" y="278">secure microservices-based platform, actively live at <tspan class="em">akissy.com</tspan>.</text>
+<text class="mark" x="56" y="350">›</text>
+<text x="110" y="350"><tspan class="em">Architecture:</tspan> Utilizing <tspan class="em">Eureka</tspan> for service discovery, <tspan class="em">Apache</tspan> <tspan class="em">Kafka</tspan> for event-driven</text>
+<text x="110" y="398">messaging, and <tspan class="em">Traefik</tspan> for boundary security and API gateway management.</text>
+<text class="mark" x="56" y="446">›</text>
+<text x="110" y="446"><tspan class="em">Communication:</tspan> Implementing both <tspan class="em">synchronous</tspan> <tspan class="em">and</tspan> <tspan class="em">asynchronous</tspan> communication patterns</text>
+<text x="110" y="494">between services to ensure high availability and resilience.</text>
+<text class="mark" x="56" y="542">›</text>
+<text x="110" y="542"><tspan class="em">Goal:</tspan> Building a high-performance system that handles complex event flows while</text>
+<text x="110" y="590">maintaining strict security standards in a production environment.</text>
+</svg>
