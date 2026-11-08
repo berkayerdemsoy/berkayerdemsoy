@@ -24,9 +24,15 @@ FONT = MONO
 
 THEMES = {
     "dark": dict(bg="#0d1117", panel="#161b22", border="#30363d", human="#f2b38a", robot="#5fd3ff",
-                 text="#e6edf3", dim="#7d8590", accent="#ffe4a3", glow="#fff3d1"),
+                 text="#e6edf3", dim="#7d8590", accent="#ffe4a3", glow="#fff3d1",
+                 ramp_h=("#6b1410", "#a3261a", "#d9481e", "#ff8a1f", "#ffc94a", "#fff4d6"),
+                 ramp_r=("#1d4fa8", "#2f6fd8", "#3f9bff", "#6cc4ff", "#aee9ff", "#f2fbff"),
+                 ramp_j=("#7a3a14", "#a8521c", "#d06e26", "#ec8f3c", "#ffb766", "#ffe0b0")),
     "light": dict(bg="#ffffff", panel="#f6f8fa", border="#d0d7de", human="#b0542a", robot="#0577a8",
-                  text="#1f2328", dim="#656d76", accent="#c26a00", glow="#ffb84d"),
+                  text="#1f2328", dim="#656d76", accent="#c26a00", glow="#ffb84d",
+                  ramp_h=("#f0a070", "#e0703a", "#c94a1c", "#a8320e", "#82220a", "#5c1606"),
+                  ramp_r=("#8fbfea", "#5b9de0", "#2d78cc", "#155aa8", "#0c4184", "#072d60"),
+                  ramp_j=("#e8a868", "#d9883e", "#c26a1e", "#9c5014", "#7a3c0e", "#5a2a08")),
 }
 
 # ---------------------------------------------------------------------------
@@ -36,7 +42,28 @@ T = 14.0                       # loop length in seconds
 CW, CH = hands_ascii.CELL_W, hands_ascii.CELL_H
 PAD_X = 40
 TOP = 96                       # y where the art starts
-LEVEL_OPACITY = {1: 0.28, 2: 0.5, 3: 0.75, 4: 1.0}
+LEVEL_OPACITY = {1: 0.6, 2: 0.85, 3: 1.0, 4: 1.0}
+# per layer: gradient id prefix, theme ramp, band slope (px) and loop length (s) of the colour wave
+WAVES = (("h", "ramp_h", 160, 6), ("r", "ramp_r", -160, 7), ("j", "ramp_j", 120, 4))
+
+
+def wave_gradients(th):
+    """Each brightness level gets a band from its own ramp step to the next, sliding diagonally.
+
+    Brightness picks the colour (dark red to cream, deep blue to ice) and the slide keeps it moving.
+    """
+    out = []
+    for cls, key, slope, dur in WAVES:
+        ramp = th[key]
+        for lv in range(1, 5):
+            a, b, c = ramp[lv - 1], ramp[lv], ramp[lv + 1]
+            out.append(f'<linearGradient id="{cls}g{lv}" gradientUnits="userSpaceOnUse" x1="0" y1="0" '
+                       f'x2="420" y2="{slope}" spreadMethod="reflect">'
+                       f'<stop offset="0" stop-color="{a}"/><stop offset=".55" stop-color="{b}"/>'
+                       f'<stop offset="1" stop-color="{c}"/>'
+                       f'<animateTransform attributeName="gradientTransform" type="translate" from="0 0" '
+                       f'to="840 {2 * slope}" dur="{dur}s" repeatCount="indefinite"/></linearGradient>')
+    return "\n".join(out)
 
 PROMPT = "berkay@erdemsoy:~$ ./connect --human --machine"
 NAME = "Berkay Erdemsoy"
@@ -159,9 +186,10 @@ def hero(th, art):
     css += [c for _, c in texts]
 
     lv_css = "".join(f'.l{k}{{fill-opacity:{v}}}' for k, v in LEVEL_OPACITY.items())
+    lv_css += "".join(f'.{cls}.l{k}{{fill:url(#{cls}g{k})}}' for cls, *_ in WAVES for k in LEVEL_OPACITY)
     hidden_still = ",".join(f".sp{i}" for i in range(1, n_frames))
     style = (f'text{{font-family:{FONT};white-space:pre;font-size:16.6px}}'
-             f'.h{{fill:{th["human"]}}}.r{{fill:{th["robot"]}}}{lv_css}'
+             f'{lv_css}'
              f'.prompt text{{fill:{th["dim"]}}}.name{{fill:{th["text"]}}}'
              f'.sub text{{fill:{th["dim"]}}}.quote{{fill:{th["accent"]}}}'
              f'.sp text{{fill:{th["accent"]};font-weight:600}}'
@@ -175,6 +203,7 @@ def hero(th, art):
 <radialGradient id="g"><stop offset="0" stop-color="{th["glow"]}" stop-opacity=".9"/><stop offset=".35" stop-color="{th["glow"]}" stop-opacity=".35"/><stop offset="1" stop-color="{th["glow"]}" stop-opacity="0"/></radialGradient>
 <linearGradient id="sb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="{th["robot"]}" stop-opacity="0"/><stop offset="1" stop-color="{th["robot"]}" stop-opacity=".35"/></linearGradient>
 <clipPath id="card"><rect x="1" y="1" width="{W - 2}" height="{H - 2}" rx="14"/></clipPath>
+{wave_gradients(th)}
 {ts.defs()}
 </defs>
 <style>{style}</style>
@@ -186,6 +215,7 @@ def hero(th, art):
 </g>
 <g class="robot">
 {layer_text(art["r"], "r", cols)}
+{layer_text(art["j"], "j", cols)}
 </g>
 <rect class="scan" x="{PAD_X}" y="{TOP - 24}" width="{cols * CW}" height="24" fill="url(#sb)"/>
 <g class="glow" style="transform-origin:{cx:.0f}px {gy - 5:.0f}px"><ellipse cx="{cx:.0f}" cy="{gy - 5:.0f}" rx="{(gx1 - gx0) * 0.9:.0f}" ry="46" fill="url(#g)"/></g>

@@ -2,7 +2,8 @@
 
 The hands are drawn as labelled vector shapes (each finger, palm and plate gets
 its own label), shaded per part, and sampled into a character grid:
-the human hand is filled with DNA bases, the robot hand with binary digits.
+the human hand is filled with DNA bases, the robot hand with binary digits,
+and the robot joints and cables with ring characters.
 Each cell carries a brightness level (1-4) that the SVG maps to opacity.
 """
 import math
@@ -17,7 +18,9 @@ CELL_W, CELL_H = 10, 15
 LIGHT = (-0.45, -0.75, 0.5)   # from the upper left, toward the viewer
 HUMAN_CHARS = "ACGT"
 ROBOT_CHARS = "01"
+JOINT_CHARS = "o@"
 ROBOT_LABEL = 30     # labels below this value belong to the human hand
+JOINT_LABEL = 150    # robot joints and cables, drawn as a separate copper layer
 
 
 class Scaled:
@@ -83,27 +86,37 @@ def draw_human(d, ox=-38):
 
 
 def draw_robot(d):
-    # forearm: armored plates descending from the upper right
-    bar(d, (800, 118), (724, 136), 46, 30)
-    bar(d, (720, 137), (650, 156), 42, 31)
+    plate = iter(range(ROBOT_LABEL, JOINT_LABEL))
+    joint = iter(range(JOINT_LABEL, 256))
+    # forearm: two armored plates entering from the upper right
+    bar(d, (820, 96), (720, 122), 40, next(plate))
+    bar(d, (712, 124), (640, 142), 34, next(plate))
+    # cables hanging under the forearm
+    bar(d, (700, 150), (628, 176), 4, next(joint))
+    bar(d, (716, 158), (640, 190), 3.5, next(joint))
     # wrist joint
-    d.ellipse([618, 128, 676, 192], fill=32)
-    # palm block
-    d.polygon([(640, 130), (644, 214), (566, 228), (530, 208), (530, 166), (560, 146)], fill=33)
-    # curled fingers, three segments each, folding back under the palm
-    for (bx, by), lab in [((544, 210), 34), ((564, 218), 35), ((586, 222), 36)]:
-        bar(d, (bx, by), (bx - 26, by + 22), 11, lab)
-        bar(d, (bx - 26, by + 24), (bx - 22, by + 50), 10, lab + 10)
-        bar(d, (bx - 20, by + 52), (bx - 2, by + 58), 9, lab + 20)
-    # thumb
-    bar(d, (604, 206), (578, 240), 12, 37)
-    bar(d, (576, 242), (548, 248), 11, 47)
-    # index finger: rigid, straight, three phalanges with joints
-    bar(d, (548, 172), (506, 177), 13, 38)
-    bar(d, (502, 178), (468, 181), 12, 48)
-    bar(d, (464, 182), (434, 184), 11, 39)
-    for cx, cy, r in [(504, 177, 10), (466, 181, 9)]:
-        d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=49)
+    d.ellipse([600, 120, 650, 172], fill=next(joint))
+    # back of the hand, palm down, tilted toward the knuckles
+    d.polygon([(612, 128), (628, 172), (588, 214), (548, 222), (516, 190), (520, 160), (560, 136)],
+              fill=next(plate))
+    # fingers: knuckle, phalanx vectors, radius; the index reaches, the rest hang
+    fingers = [
+        ((520, 168), [(-34, 10), (-28, 7), (-24, 5)], 10.5),
+        ((530, 190), [(-30, 18), (-20, 18), (-12, 16)], 10),
+        ((548, 206), [(-20, 24), (-10, 22), (-4, 18)], 9.5),
+        ((570, 214), [(-8, 26), (-2, 20), (2, 16)], 8.5),
+    ]
+    for (x, y), segs, r in fingers:
+        for i, (dx, dy) in enumerate(segs):
+            k = 0.86 if i else 1.0          # shortened phalanx leaves a gap at the joint
+            bar(d, (x, y), (x + dx * k, y + dy * k), r * (1 - 0.08 * i), next(plate))
+            x, y = x + dx, y + dy
+            if i < len(segs) - 1:
+                jr = r * 0.62
+                d.ellipse([x - jr, y - jr, x + jr, y + jr], fill=next(joint))
+    # thumb tucked under the palm
+    bar(d, (590, 212), (566, 236), 9, next(plate))
+    bar(d, (564, 240), (548, 252), 8, next(plate))
 
 
 def render_labels():
@@ -150,7 +163,10 @@ def _open_gaps(lab, gap=7):
 
 
 def build(seed=7):
-    """Return {"h": rows, "r": rows}; each row is a list of (char, level) with level 0 for empty."""
+    """Return {"h", "r", "j"} rows (human, robot plates, robot joints).
+
+    Each row is a list of (char, level) with level 0 for empty.
+    """
     lab = render_labels()
     W, H = lab.size
     pixels = lab.get_flattened_data() if hasattr(lab, "get_flattened_data") else lab.getdata()
@@ -164,18 +180,19 @@ def build(seed=7):
     light = _norm(LIGHT)
     rnd = random.Random(seed)
     cols, rows = W // CELL_W, H // CELL_H
-    out = {"h": [], "r": []}
+    out = {"h": [], "r": [], "j": []}
     d = 8
     for r in range(rows):
-        hr, rr = [], []
+        hr, rr, jr = [], [], []
         for c in range(cols):
-            cnt, n = {"h": 0, "r": 0}, 0
+            cnt, n, n_joint = {"h": 0, "r": 0}, 0, 0
             for y in range(r * CELL_H, (r + 1) * CELL_H, 3):
                 for x in range(c * CELL_W, (c + 1) * CELL_W, 2):
                     v = px[x, y]
                     n += 1
                     if v:
                         cnt["h" if v < ROBOT_LABEL else "r"] += 1
+                        n_joint += v >= JOINT_LABEL
             x, y = c * CELL_W + CELL_W // 2, r * CELL_H + CELL_H // 2
             for k, row in (("h", hr), ("r", rr)):
                 cov = cnt[k] / n
@@ -198,14 +215,21 @@ def build(seed=7):
                 else:
                     ch = rnd.choice(HUMAN_CHARS if k == "h" else ROBOT_CHARS)
                 row.append((ch, level))
+            # robot cells covered mostly by a joint or cable move to the copper layer
+            if rr[-1][1] and n_joint * 2 > cnt["r"]:
+                jr.append((rnd.choice(JOINT_CHARS), rr[-1][1]))
+                rr[-1] = (" ", 0)
+            else:
+                jr.append((" ", 0))
         out["h"].append(hr)
         out["r"].append(rr)
+        out["j"].append(jr)
     # drop empty rows at the top and bottom
-    keep = [i for i in range(rows) if any(ch != " " for ch, _ in out["h"][i] + out["r"][i])]
+    keep = [i for i in range(rows) if any(ch != " " for ch, _ in out["h"][i] + out["r"][i] + out["j"][i])]
     return {k: v[keep[0]:keep[-1] + 1] for k, v in out.items()}
 
 
 if __name__ == "__main__":
     o = build()
-    for a, b in zip(o["h"], o["r"]):
-        print("".join(y[0] if y[0] != " " else x[0] for x, y in zip(a, b)).rstrip())
+    for rows in zip(o["h"], o["r"], o["j"]):
+        print("".join(next((ch for ch, _ in cells if ch != " "), " ") for cells in zip(*rows)).rstrip())
